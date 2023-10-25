@@ -1,6 +1,6 @@
 #include <cctype>
 #include <iostream>
-#include     <string>
+#include <string>
 #include <vector>
 
 #include "TransformChar.hpp"
@@ -17,7 +17,6 @@ std::string transformChar (const char in_char) {
     if (std::isalpha(in_char)) {
         // If so, convert to uppper case
         outputString += std::toupper(in_char);
-        std::cout << outputString << std::endl;
     }
 
     // Transliterate digits to English words

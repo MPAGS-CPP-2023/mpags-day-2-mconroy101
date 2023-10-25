@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 
 // Include our functions defined in other files
 #include "TransformChar.hpp"
@@ -20,32 +21,72 @@ int main(int argc, char* argv[])
     std::string outputFile{""};
 
     // Process command line input
-    processCommandLine(cmdLineArgs, helpRequested, versionRequested, inputFile, inputFile);
+    processCommandLine(cmdLineArgs, helpRequested, versionRequested, inputFile, outputFile);
 
     // Initialise variables
     char inputChar{'x'};
     std::string inputText;
 
-    // Loop over input and apply function to each character, adding returned string to total string
-    while (std::cin >> inputChar)
+    // Check whether user has specified an input file, and has not requested help or version
+    if (!inputFile.empty() and helpRequested == false and versionRequested == false) {
+        
+        // Create instance of ifstream to read in file
+        std::ifstream in_file {inputFile};
+        // Check if file has opened properly
+        bool ok_to_read = in_file.good();
+        // If it has, then read from file
+        if (ok_to_read == true)
+        {
+            // Loop over input and apply function to each character, adding returned string to total string
+            while (in_file >> inputChar)
+            {
+                inputText += (transformChar(inputChar));
+            }
+        }
+        // Inform user that they the input file they specified was not found
+        else {
+            std::cerr << "[error] Input file " << inputFile << " not found. Could not load data.\n";
+            return 1; 
+        }
+    }
+
+    // If user has not provided an input file, read from user input to terminal
+    else if (helpRequested == false and versionRequested == false)
     {
-        inputText += (transformChar(inputChar));
+        std::cout << "Enter input cipher text, press Enter, then press Ctrl + D to process.\n>>> ";
+        
+        // Loop over input and apply function to each character, adding returned string to total string
+        while (std::cin >> inputChar)
+        {
+            inputText += (transformChar(inputChar));
+
+        }
     }
 
-    // Read in user input from stdin/file
-    // Warn that input file option not yet implemented
-    if (!inputFile.empty()) {
-        std::cerr << "[warning] input from file ('" << inputFile
-                  << "') not implemented yet, using stdin\n";
+    // If user has provided an output file, write result to it
+    if (!outputFile.empty() and helpRequested == false and versionRequested == false) {
+        // Create instance of ifstream to read in file
+        std::ofstream out_file {outputFile};
+        // Check if file has opened properly
+        bool ok_to_write = out_file.good();
+
+        // If so, write output text to file
+        if (ok_to_write == true)
+        {
+            std::cout << "Written output to file: " << outputFile << std::endl;
+            out_file << inputText << std::endl;
+        }
+
+        else {
+            std::cerr << "[error] Output file " << outputFile << " not found. Could not write data.\n";
+            return 1;
+        }
     }
-
-    // Print out the transliterated text
-    std::cout << "Output: " << inputText << std::endl;
-
-    // Warn that output file option not yet implemented
-    if (!outputFile.empty()) {
-        std::cerr << "[warning] output to file ('" << outputFile
-                  << "') not implemented yet, using stdout\n";
+    // Otherwise, as long as help or version not requested, print to terminal
+    else if (helpRequested == false and versionRequested == false)
+    {
+        // Print out the transliterated text
+        std::cout << "Output: " << inputText << std::endl;
     }
 
 
