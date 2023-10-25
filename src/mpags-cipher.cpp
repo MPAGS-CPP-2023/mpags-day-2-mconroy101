@@ -7,7 +7,7 @@
 // Include our functions defined in other files
 #include "TransformChar.hpp"
 #include "ProcessCommandLine.hpp"
-
+#include "RunCaesarCipher.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -19,16 +19,21 @@ int main(int argc, char* argv[])
     bool versionRequested{false};
     std::string inputFile{""};
     std::string outputFile{""};
+    bool encrypt{true};
+    size_t key{0};
+    bool cipherEnabled{false};
 
     // Process command line input
-    processCommandLine(cmdLineArgs, helpRequested, versionRequested, inputFile, outputFile);
+    processCommandLine(cmdLineArgs, helpRequested, versionRequested,
+                     inputFile, outputFile, encrypt, key, cipherEnabled);
 
     // Initialise variables
     char inputChar{'x'};
     std::string inputText;
+    std::string outputText;
 
     // Check whether user has specified an input file, and has not requested help or version
-    if (!inputFile.empty() and helpRequested == false and versionRequested == false) {
+    if (!inputFile.empty() and helpRequested == false and versionRequested == false and cipherEnabled == true) {
         
         // Create instance of ifstream to read in file
         std::ifstream in_file {inputFile};
@@ -51,7 +56,7 @@ int main(int argc, char* argv[])
     }
 
     // If user has not provided an input file, read from user input to terminal
-    else if (helpRequested == false and versionRequested == false)
+    else if (helpRequested == false and versionRequested == false and cipherEnabled == true)
     {
         std::cout << "Enter input cipher text, press Enter, then press Ctrl + D to process.\n>>> ";
         
@@ -63,8 +68,14 @@ int main(int argc, char* argv[])
         }
     }
 
+    // Update user with intermediate step of conveting text
+    std::cout << "Converted input to alpanumerical and uppercase: " << inputText << std::endl;
+
+    // With processed uppercase alphanumerical text, apply Caesar cipher
+    outputText = runCaesarCipher(encrypt, inputText, key);
+
     // If user has provided an output file, write result to it
-    if (!outputFile.empty() and helpRequested == false and versionRequested == false) {
+    if (!outputFile.empty() and helpRequested == false and versionRequested == false and cipherEnabled == true) {
         // Create instance of ifstream to read in file
         std::ofstream out_file {outputFile};
         // Check if file has opened properly
@@ -74,7 +85,7 @@ int main(int argc, char* argv[])
         if (ok_to_write == true)
         {
             std::cout << "Written output to file: " << outputFile << std::endl;
-            out_file << inputText << std::endl;
+            out_file << outputText << std::endl;
         }
 
         else {
@@ -83,13 +94,13 @@ int main(int argc, char* argv[])
         }
     }
     // Otherwise, as long as help or version not requested, print to terminal
-    else if (helpRequested == false and versionRequested == false)
+    else if (helpRequested == false and versionRequested == false and cipherEnabled == true)
     {
         // Print out the transliterated text
-        std::cout << "Output: " << inputText << std::endl;
+        std::cout << "Output: " << outputText << std::endl;
     }
 
-
+    
     // No requirement to return from main, but we do so for clarity
     // and for consistency with other functions
     return 0;

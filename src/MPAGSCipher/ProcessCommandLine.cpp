@@ -9,7 +9,10 @@ bool processCommandLine(const std::vector<std::string>& args,   // We pass in th
                         bool& helpRequested,                    // We pass in the empty declared variables for the possible options
                         bool& versionRequested,                 // Here, we choose to pass by reference because we want to alter these
                         std::string& inputFileName,             // variables so that they update and the rest of the code can see their
-                        std::string& outputFileName)            // new states.
+                        std::string& outputFileName,            // new states.
+                        bool& encrypt,
+                        size_t& key,
+                        bool& cipherEnabled)
     {
 
         //const std::size_t n_args {args.size()};
@@ -60,6 +63,54 @@ bool processCommandLine(const std::vector<std::string>& args,   // We pass in th
                     ++i;
                 }
             } 
+
+            else if (args[i] == "decrypt")
+            {
+                // If user specifies to decrypt then set encrypt flag to 0
+
+                // Handle output file option
+                // Next element is KEY unless "decrypt" is the last argument
+                if (i == args.size() - 1) {
+                    std::cerr << "[error] decrypt requires a key argument"
+                            << std::endl;
+                    // exit main with non-zero return to indicate failure
+                    return 1;
+                } 
+                
+                else {
+                    // KEY has been specified so set it and set cipher enabled
+                    key = stoul(args[i + 1]);
+                    encrypt = false;
+                    std::cout << key << std::endl;
+                    cipherEnabled = true;
+                    ++i;
+                }
+            }
+
+            else if (args[i] == "encrypt")
+            {
+                // If user specifies to encrypt then set encrypt flag to 1
+                // Note: This is the default behaviour since 'encrypt' variable
+                // defaults to 'true'
+
+                // Handle output file option
+                // Next element is filename unless "-o" is the last argument
+                if (i == args.size() - 1) {
+                    std::cerr << "[error] encrypt requires a key argument"
+                            << std::endl;
+                    // exit main with non-zero return to indicate failure
+                    return 1;
+                } 
+                
+                else {
+                    // Got filename, so assign value and advance past it
+                    key = stoul(args[i + 1]);
+                    encrypt = true;
+                    std::cout << key << std::endl;
+                    cipherEnabled = true;
+                    ++i;
+                }
+            }
             
             else {
                 // Have an unknown flag to output error message and return non-zero
@@ -83,6 +134,8 @@ bool processCommandLine(const std::vector<std::string>& args,   // We pass in th
                 << "                   Stdin will be used if not supplied\n\n"
                 << "  -o FILE          Write processed text to FILE\n"
                 << "                   Stdout will be used if not supplied\n\n"
+                << "  encrypt KEY      Encrypts input using KEY\n\n"
+                << "  decrypt KEY      Decrypts input using KEY\n\n"
                 << std::endl;
             // Help requires no further action, so return from main
             // with 0 used to indicate success
